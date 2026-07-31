@@ -63,6 +63,11 @@ namespace Switcheroo
         private AltTabHook _altTabHook;
         private SystemWindow _foregroundWindow;
         private bool _altTabAutoSwitch;
+        private DispatcherTimer _hotkeyRetryTimer;
+        private DispatcherTimer _curHotkeyRetryTimer;
+        private int _hotkeyRetryCount;
+        private int _curHotkeyRetryCount;
+        private const int MaxHotkeyRetries = 5;
 
         public MainWindow()
         {
@@ -144,19 +149,10 @@ namespace Switcheroo
             Application.Current.Properties["hotkey"] = _hotkey;
 
             _hotkey.HotkeyPressed += hotkey_HotkeyPressed;
-            try
-            {
-                _hotkey.Enabled = Settings.Default.EnableHotKey;
-            }
-            catch (HotkeyAlreadyInUseException)
-            {
-                var boxText = "The current hotkey for activating Switcheroo is in use by another program." +
-                              Environment.NewLine +
-                              Environment.NewLine +
-                              "You can change the hotkey by right-clicking the Switcheroo icon in the system tray and choosing 'Options'.";
-                MessageBox.Show(boxText, "Hotkey already in use", MessageBoxButton.OK, MessageBoxImage.Warning);
-            }
+            _hotkeyRetryCount = 0;
+            TryEnableHotKey(_hotkey, Settings.Default.EnableHotKey, isCurHotKey: false);
         }
+
         private void SetUpCurHotKey()
         {
             _curHotkey = new HotKey();
@@ -165,17 +161,74 @@ namespace Switcheroo
             Application.Current.Properties["curHotkey"] = _curHotkey;
 
             _curHotkey.HotkeyPressed += hotkey_HotkeyPressed;
+            _curHotkeyRetryCount = 0;
+            TryEnableHotKey(_curHotkey, Settings.Default.EnableHotKey, isCurHotKey: true);
+        }
+
+        private void TryEnableHotKey(HotKey hotkey, bool enable, bool isCurHotKey)
+        {
             try
             {
-                _curHotkey.Enabled = Settings.Default.EnableHotKey;
+                hotkey.Enabled = enable;
             }
             catch (HotkeyAlreadyInUseException)
             {
-                var boxText = "The current hotkey for activating Switcheroo is in use by another program." +
-                              Environment.NewLine +
-                              Environment.NewLine +
-                              "You can change the hotkey by right-clicking the Switcheroo icon in the system tray and choosing 'Options'.";
-                MessageBox.Show(boxText, "Hotkey already in use", MessageBoxButton.OK, MessageBoxImage.Warning);
+                if (isCurHotKey)
+                {
+                    if (_curHotkeyRetryCount < MaxHotkeyRetries)
+                    {
+                        _curHotkeyRetryCount++;
+                        if (_curHotkeyRetryTimer == null)
+                        {
+                            _curHotkeyRetryTimer = new DispatcherTimer
+                            {
+                                Interval = TimeSpan.FromSeconds(3)
+                            };
+                            _curHotkeyRetryTimer.Tick += (s, e) =>
+                            {
+                                _curHotkeyRetryTimer.Stop();
+                                TryEnableHotKey(_curHotkey, Settings.Default.EnableHotKey, isCurHotKey: true);
+                            };
+                        }
+                        _curHotkeyRetryTimer.Start();
+                    }
+                    else
+                    {
+                        var boxText = "The current hotkey for activating Switcheroo is in use by another program." +
+                                      Environment.NewLine +
+                                      Environment.NewLine +
+                                      "You can change the hotkey by right-clicking the Switcheroo icon in the system tray and choosing 'Options'.";
+                        MessageBox.Show(boxText, "Hotkey already in use", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    }
+                }
+                else
+                {
+                    if (_hotkeyRetryCount < MaxHotkeyRetries)
+                    {
+                        _hotkeyRetryCount++;
+                        if (_hotkeyRetryTimer == null)
+                        {
+                            _hotkeyRetryTimer = new DispatcherTimer
+                            {
+                                Interval = TimeSpan.FromSeconds(3)
+                            };
+                            _hotkeyRetryTimer.Tick += (s, e) =>
+                            {
+                                _hotkeyRetryTimer.Stop();
+                                TryEnableHotKey(_hotkey, Settings.Default.EnableHotKey, isCurHotKey: false);
+                            };
+                        }
+                        _hotkeyRetryTimer.Start();
+                    }
+                    else
+                    {
+                        var boxText = "The current hotkey for activating Switcheroo is in use by another program." +
+                                      Environment.NewLine +
+                                      Environment.NewLine +
+                                      "You can change the hotkey by right-clicking the Switcheroo icon in the system tray and choosing 'Options'.";
+                        MessageBox.Show(boxText, "Hotkey already in use", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    }
+                }
             }
         }
 
@@ -500,6 +553,16 @@ namespace Switcheroo
         /// </summary>
         private void Quit()
         {
+            if (_hotkeyRetryTimer != null)
+            {
+                _hotkeyRetryTimer.Stop();
+                _hotkeyRetryTimer = null;
+            }
+            if (_curHotkeyRetryTimer != null)
+            {
+                _curHotkeyRetryTimer.Stop();
+                _curHotkeyRetryTimer = null;
+            }
             _notifyIcon.Dispose();
             _notifyIcon = null;
             _hotkey.Dispose();
