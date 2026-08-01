@@ -132,7 +132,15 @@ namespace ManagedWinapi.Hooks
             {
                 hHook = SetWindowsHookEx(type, delegt, IntPtr.Zero, getThreadID());
             }
-            if (hHook == IntPtr.Zero) throw new Win32Exception(Marshal.GetLastWin32Error());
+            if (hHook == IntPtr.Zero)
+            {
+                int error = Marshal.GetLastWin32Error();
+                Trace.WriteLine(string.Format("SetWindowsHookEx({0}) FAILED. Win32 error={1} (0x{1:X})",
+                    type, error));
+                throw new Win32Exception(error);
+            }
+            Trace.WriteLine(string.Format("SetWindowsHookEx({0}) OK. hHook=0x{1}", type,
+                hHook.ToInt64().ToString("X")));
             hooked = true;
         }
 

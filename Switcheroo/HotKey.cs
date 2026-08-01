@@ -18,6 +18,8 @@
  * along with Switcheroo.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+using System.Diagnostics;
+
 namespace Switcheroo
 {
     public class HotKey : ManagedWinapi.Hotkey
@@ -30,7 +32,8 @@ namespace Switcheroo
             Ctrl = Properties.Settings.Default.Ctrl;
             Shift = Properties.Settings.Default.Shift;
             strName= Properties.Settings.Default.HotKeyName;
-
+            Trace.WriteLine(string.Format("HotKey.LoadSettings: KeyCode={0} Alt={1} Ctrl={2} Shift={3} Win={4} Name='{5}'",
+                KeyCode, Alt, Ctrl, Shift, WindowsKey, strName));
         }
         public void curLoadSettings()
         {
@@ -40,6 +43,8 @@ namespace Switcheroo
             Ctrl = Properties.Settings.Default.CurCtrl;
             Shift = Properties.Settings.Default.CurShift;
             strName = Properties.Settings.Default.CurHotKeyName;
+            Trace.WriteLine(string.Format("HotKey.curLoadSettings: KeyCode={0} Alt={1} Ctrl={2} Shift={3} Win={4} Name='{5}'",
+                KeyCode, Alt, Ctrl, Shift, WindowsKey, strName));
         }
 
         public void SaveSettings(HotKey _userDefined)

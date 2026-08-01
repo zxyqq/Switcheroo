@@ -69,22 +69,31 @@ namespace Switcheroo
         private int _curHotkeyRetryCount;
         private const int MaxHotkeyRetries = 5;
 
+        private static void Log(string message)
+        {
+            Trace.WriteLine("[MainWindow] " + message);
+        }
+
         public MainWindow()
         {
             InitializeComponent();
+            Log("Constructor: InitializeComponent done.");
 
             SetUpKeyBindings();
-
             SetUpNotifyIcon();
+            Log("NotifyIcon set up.");
 
             SetUpHotKey();
             SetUpCurHotKey();
+            Log("Hotkey setup done.");
 
             SetUpAltTabHook();
+            Log("AltTabHook set up.");
 
             CheckForUpdates();
 
             Opacity = 0;
+            Log("Constructor complete.");
         }
 
         /// =================================
@@ -145,6 +154,7 @@ namespace Switcheroo
         {
             _hotkey = new HotKey();
             _hotkey.LoadSettings();
+            Log("HotKey settings loaded. Name='" + _hotkey.strName + "'");
 
             Application.Current.Properties["hotkey"] = _hotkey;
 
@@ -157,6 +167,7 @@ namespace Switcheroo
         {
             _curHotkey = new HotKey();
             _curHotkey.curLoadSettings();
+            Log("CurHotKey settings loaded. Name='" + _curHotkey.strName + "'");
 
             Application.Current.Properties["curHotkey"] = _curHotkey;
 
@@ -167,9 +178,11 @@ namespace Switcheroo
 
         private void TryEnableHotKey(HotKey hotkey, bool enable, bool isCurHotKey)
         {
+            string label = isCurHotKey ? "CurHotKey" : "HotKey";
             try
             {
                 hotkey.Enabled = enable;
+                Log(label + " enabled (Enabled=" + enable + ").");
             }
             catch (HotkeyAlreadyInUseException)
             {
@@ -178,6 +191,8 @@ namespace Switcheroo
                     if (_curHotkeyRetryCount < MaxHotkeyRetries)
                     {
                         _curHotkeyRetryCount++;
+                        Log(label + " registration failed (attempt " + _curHotkeyRetryCount + "/" +
+                            MaxHotkeyRetries + "). Will retry in 3 seconds.");
                         if (_curHotkeyRetryTimer == null)
                         {
                             _curHotkeyRetryTimer = new DispatcherTimer
@@ -194,6 +209,8 @@ namespace Switcheroo
                     }
                     else
                     {
+                        Log(label + " registration failed after " + MaxHotkeyRetries +
+                            " attempts. Giving up and notifying the user.");
                         var boxText = "The current hotkey for activating Switcheroo is in use by another program." +
                                       Environment.NewLine +
                                       Environment.NewLine +
@@ -206,6 +223,8 @@ namespace Switcheroo
                     if (_hotkeyRetryCount < MaxHotkeyRetries)
                     {
                         _hotkeyRetryCount++;
+                        Log(label + " registration failed (attempt " + _hotkeyRetryCount + "/" +
+                            MaxHotkeyRetries + "). Will retry in 3 seconds.");
                         if (_hotkeyRetryTimer == null)
                         {
                             _hotkeyRetryTimer = new DispatcherTimer
@@ -222,6 +241,8 @@ namespace Switcheroo
                     }
                     else
                     {
+                        Log(label + " registration failed after " + MaxHotkeyRetries +
+                            " attempts. Giving up and notifying the user.");
                         var boxText = "The current hotkey for activating Switcheroo is in use by another program." +
                                       Environment.NewLine +
                                       Environment.NewLine +
@@ -585,11 +606,15 @@ namespace Switcheroo
 
         private void hotkey_HotkeyPressed(object sender, EventArgs e)
         {
+            string shortcutName = (sender as Switcheroo.HotKey).strName;
+            Log("hotkey_HotkeyPressed fired. Name='" + shortcutName +
+                "', Visibility=" + Visibility + ", EnableHotKey=" + Settings.Default.EnableHotKey +
+                ", CurEnableHotKey=" + Settings.Default.CurEnableHotKey);
+
             if (!Settings.Default.EnableHotKey && !Settings.Default.CurEnableHotKey)
             {
                 return;
             }
-            string shortcutName = (sender as Switcheroo.HotKey).strName;
 
             if (Visibility != Visibility.Visible)
             {
@@ -645,6 +670,9 @@ namespace Switcheroo
 
         private void AltTabPressed(object sender, AltTabHookEventArgs e)
         {
+            Log("AltTabPressed fired. CtrlDown=" + e.CtrlDown + ", ShiftDown=" + e.ShiftDown +
+                ", AltTabHook=" + Settings.Default.AltTabHook);
+
             if (!Settings.Default.AltTabHook)
             {
                 // Ignore Alt+Tab presses if the hook is not activated by the user

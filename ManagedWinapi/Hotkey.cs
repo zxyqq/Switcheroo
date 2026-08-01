@@ -23,6 +23,7 @@ using System.Text;
 using System.ComponentModel;
 using System.Windows.Forms;
 using System.Runtime.InteropServices;
+using System.Diagnostics;
 using ManagedWinapi.Windows;
 
 namespace ManagedWinapi
@@ -155,6 +156,8 @@ namespace ManagedWinapi
             if (handled) return;
             if (m.Msg == WM_HOTKEY && m.WParam.ToInt32() == hotkeyIndex)
             {
+                Trace.WriteLine(string.Format("WM_HOTKEY received for hotkey index {0} (0x{1:X})",
+                    hotkeyIndex, hotkeyIndex));
                 if (HotkeyPressed != null)
                     HotkeyPressed(this, EventArgs.Empty);
                 handled = true;
@@ -179,16 +182,28 @@ namespace ManagedWinapi
             if (isRegistered && (!shouldBeRegistered || reregister))
             {
                 // unregister hotkey
+                Trace.WriteLine(string.Format("UnregisterHotKey: hWnd=0x{0} index=0x{1:X} key={2}",
+                    hWnd.ToInt64().ToString("X8"), hotkeyIndex, _keyCode));
                 UnregisterHotKey(hWnd, hotkeyIndex);
                 isRegistered = false;
             }
             if (!isRegistered && shouldBeRegistered)
             {
                 // register hotkey
-                bool success = RegisterHotKey(hWnd, hotkeyIndex, 
-                    (_shift ? MOD_SHIFT : 0) + (_ctrl ? MOD_CONTROL : 0) +
-                    (_alt ? MOD_ALT : 0) + (_windows ? MOD_WIN : 0), (int)_keyCode);
-                if (!success) throw new HotkeyAlreadyInUseException();
+                int modifiers = (_shift ? MOD_SHIFT : 0) + (_ctrl ? MOD_CONTROL : 0) +
+                                (_alt ? MOD_ALT : 0) + (_windows ? MOD_WIN : 0);
+                Trace.WriteLine(string.Format("RegisterHotKey: hWnd=0x{0} index=0x{1:X} key={2} modifiers=0x{3:X}",
+                    hWnd.ToInt64().ToString("X8"), hotkeyIndex, _keyCode, modifiers));
+                bool success = RegisterHotKey(hWnd, hotkeyIndex, modifiers, (int)_keyCode);
+                if (!success)
+                {
+                    int error = Marshal.GetLastWin32Error();
+                    Trace.WriteLine(string.Format("RegisterHotKey FAILED. Win32 error={0} (0x{0:X}). " +
+                        "Error 1409 = ERROR_HOTKEY_ALREADY_REGISTERED (another program owns this hotkey).", error));
+                    throw new HotkeyAlreadyInUseException();
+                }
+                Trace.WriteLine(string.Format("RegisterHotKey SUCCEEDED for index 0x{0:X} key={1}",
+                    hotkeyIndex, _keyCode));
                 isRegistered = true;
             }
         }

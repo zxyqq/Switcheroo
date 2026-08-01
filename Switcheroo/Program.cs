@@ -21,6 +21,7 @@
 using System;
 using System.Configuration;
 using System.Diagnostics;
+using System.IO;
 using System.Reflection;
 using System.Security.Principal;
 using System.Threading;
@@ -35,6 +36,30 @@ namespace Switcheroo
         [STAThread]
         private static void Main()
         {
+            ConfigureLogging();
+
+            Trace.WriteLine(string.Format("=== Switcheroo {0} starting ===",
+                Assembly.GetExecutingAssembly().GetName().Version));
+            Trace.WriteLine("CurrentDirectory=" + Environment.CurrentDirectory);
+            Trace.WriteLine("CommandLine=" + Environment.CommandLine);
+            Trace.WriteLine("IsAdmin=" + IsRunAsAdmin() + ", RunAsAdminSetting=" + Settings.Default.RunAsAdmin);
+            Trace.WriteLine("EnableHotKey=" + Settings.Default.EnableHotKey +
+                            ", CurEnableHotKey=" + Settings.Default.CurEnableHotKey +
+                            ", AltTabHook=" + Settings.Default.AltTabHook +
+                            ", FirstRun=" + Settings.Default.FirstRun);
+            Trace.WriteLine("Main hotkey: KeyCode=" + Settings.Default.HotKey +
+                            " Alt=" + Settings.Default.Alt +
+                            " Ctrl=" + Settings.Default.Ctrl +
+                            " Shift=" + Settings.Default.Shift +
+                            " Win=" + Settings.Default.WindowsKey +
+                            " Name=" + Settings.Default.HotKeyName);
+            Trace.WriteLine("Cur hotkey: KeyCode=" + Settings.Default.CurHotKey +
+                            " Alt=" + Settings.Default.CurAlt +
+                            " Ctrl=" + Settings.Default.CurCtrl +
+                            " Shift=" + Settings.Default.CurShift +
+                            " Win=" + Settings.Default.CurWindowsKey +
+                            " Name=" + Settings.Default.CurHotKeyName);
+
             RunAsAdministratorIfConfigured();
 
             using (var mutex = new Mutex(false, mutex_id))
@@ -45,11 +70,17 @@ namespace Switcheroo
                     try
                     {
                         hasHandle = mutex.WaitOne(5000, false);
-                        if (hasHandle == false) return; //another instance exist
+                        if (hasHandle == false)
+                        {
+                            Trace.WriteLine("Another instance is already running - exiting.");
+                            return; //another instance exist
+                        }
+                        Trace.WriteLine("Single-instance mutex acquired.");
                     }
                     catch (AbandonedMutexException)
                     {
-                        // Log the fact the mutex was abandoned in another process, it will still get aquired
+                        Trace.WriteLine("Mutex was abandoned - acquiring it.");
+                        hasHandle = true;
                     }
 
 #if PORTABLE
@@ -58,11 +89,22 @@ namespace Switcheroo
 
                     MigrateUserSettings();
 
-                    var app = new App
+                    try
                     {
-                        MainWindow = new MainWindow()
-                    };
-                    app.Run();
+                        Trace.WriteLine("Creating App and MainWindow...");
+                        var app = new App
+                        {
+                            MainWindow = new MainWindow()
+                        };
+                        Trace.WriteLine("MainWindow created. Starting WPF message loop (app.Run)...");
+                        app.Run();
+                        Trace.WriteLine("app.Run returned - application exited normally.");
+                    }
+                    catch (Exception ex)
+                    {
+                        Trace.WriteLine("FATAL UNHANDLED EXCEPTION: " + ex);
+                        throw;
+                    }
                 }
                 finally
                 {
@@ -72,10 +114,36 @@ namespace Switcheroo
             }
         }
 
+        private static void ConfigureLogging()
+        {
+            try
+            {
+                var logDirectory = Path.Combine(
+                    Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Switcheroo");
+                Directory.CreateDirectory(logDirectory);
+                var logPath = Path.Combine(logDirectory, "switcheroo.log");
+                Trace.Listeners.Clear();
+                var fileStream = new FileStream(logPath, FileMode.Append, FileAccess.Write, FileShare.ReadWrite);
+                Trace.Listeners.Add(new TextWriterTraceListener(fileStream)
+                {
+                    TraceOutputOptions = TraceOptions.DateTime | TraceOptions.ThreadId
+                });
+                Trace.AutoFlush = true;
+                Trace.WriteLine(string.Format("--- process started at {0} (PID {1}) ---",
+                    DateTime.Now, Process.GetCurrentProcess().Id));
+            }
+            catch (Exception ex)
+            {
+                // Logging must never prevent the app from starting
+                System.Diagnostics.Debug.WriteLine("Failed to configure logging: " + ex);
+            }
+        }
+
         private static void RunAsAdministratorIfConfigured()
         {
             if (RunAsAdminRequested() && !IsRunAsAdmin())
             {
+                Trace.WriteLine("Restarting elevated as administrator (UAC)...");
                 ProcessStartInfo proc = new ProcessStartInfo
                 {
                     UseShellExecute = true,
@@ -85,6 +153,7 @@ namespace Switcheroo
                 };
 
                 Process.Start(proc);
+                Trace.WriteLine("Elevated process launched - exiting current instance.");
                 Environment.Exit(0);
             }
         }
