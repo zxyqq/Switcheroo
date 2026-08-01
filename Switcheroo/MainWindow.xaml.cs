@@ -173,7 +173,7 @@ namespace Switcheroo
 
             _curHotkey.HotkeyPressed += hotkey_HotkeyPressed;
             _curHotkeyRetryCount = 0;
-            TryEnableHotKey(_curHotkey, Settings.Default.EnableHotKey, isCurHotKey: true);
+            TryEnableHotKey(_curHotkey, Settings.Default.CurEnableHotKey, isCurHotKey: true);
         }
 
         private void TryEnableHotKey(HotKey hotkey, bool enable, bool isCurHotKey)
@@ -202,7 +202,7 @@ namespace Switcheroo
                             _curHotkeyRetryTimer.Tick += (s, e) =>
                             {
                                 _curHotkeyRetryTimer.Stop();
-                                TryEnableHotKey(_curHotkey, Settings.Default.EnableHotKey, isCurHotKey: true);
+                                TryEnableHotKey(_curHotkey, Settings.Default.CurEnableHotKey, isCurHotKey: true);
                             };
                         }
                         _curHotkeyRetryTimer.Start();
@@ -648,7 +648,7 @@ namespace Switcheroo
                 }
                 else
                 {
-                    if (!Settings.Default.CurEnableHotKey)
+                    if (!Settings.Default.EnableHotKey)
                     {
                         return;
                     }
