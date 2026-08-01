@@ -93,6 +93,7 @@ namespace Switcheroo
             EnableLogCheckBox.IsChecked = Settings.Default.EnableLog;
             WindowWidthTextBox.Text = Settings.Default.WindowWidth.ToString(CultureInfo.CurrentCulture);
             WindowHeightTextBox.Text = Settings.Default.WindowHeight.ToString(CultureInfo.CurrentCulture);
+            FontSizeTextBox.Text = Settings.Default.FontSize.ToString(CultureInfo.CurrentCulture);
         }
 
         private void Cancel_Click(object sender, RoutedEventArgs e)
@@ -171,6 +172,12 @@ namespace Switcheroo
                 && height >= 0 && height <= 4000)
             {
                 Settings.Default.WindowHeight = height;
+            }
+            double fontSize;
+            if (double.TryParse(FontSizeTextBox.Text, NumberStyles.Float, CultureInfo.CurrentCulture, out fontSize)
+                && fontSize >= 8 && fontSize <= 48)
+            {
+                Settings.Default.FontSize = fontSize;
             }
 
             Settings.Default.Save();

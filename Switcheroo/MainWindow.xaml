@@ -120,10 +120,10 @@
                                                              IfTrue="{StaticResource FadeOutOpacity}" IfFalse="1.0" />
 
                                 <Color x:Key="FadeOutColor">Silver</Color>
-                                <local:BoolToColorConverter x:Key="TitleColorConverter"
-                                                            IfTrue="{StaticResource FadeOutColor}" IfFalse="Black" />
-                                <local:BoolToColorConverter x:Key="ProcessColorConverter"
-                                                            IfTrue="{StaticResource FadeOutColor}" IfFalse="Gray" />
+                                <local:SelectionAwareColorConverter x:Key="TitleColorConverter"
+                                                                    SelectedColor="White" NormalColor="Black" ClosingColor="Silver" />
+                                <local:SelectionAwareColorConverter x:Key="ProcessColorConverter"
+                                                                    SelectedColor="White" NormalColor="Gray" ClosingColor="Silver" />
 
                                 <Style TargetType="{x:Type TextBlock}">
                                     <Style.Triggers>
@@ -180,16 +180,30 @@
                                 <TextBlock local:FormattedTextAttribute.FormattedText="{Binding Path=FormattedTitle}"
                                            Grid.Row="0" Grid.Column="1" Margin="3,0">
                                     <TextBlock.Foreground>
-                                        <SolidColorBrush
-                                            Color="{Binding IsBeingClosed, Converter={StaticResource TitleColorConverter}, Mode=OneTime}" />
+                                        <SolidColorBrush>
+                                            <SolidColorBrush.Color>
+                                                <MultiBinding Converter="{StaticResource TitleColorConverter}">
+                                                    <Binding Path="IsBeingClosed" />
+                                                    <Binding RelativeSource="{RelativeSource AncestorType={x:Type ListBoxItem}}"
+                                                             Path="IsSelected" />
+                                                </MultiBinding>
+                                            </SolidColorBrush.Color>
+                                        </SolidColorBrush>
                                     </TextBlock.Foreground>
                                 </TextBlock>
                                 <TextBlock
                                     local:FormattedTextAttribute.FormattedText="{Binding Path=FormattedProcessTitle}"
                                     Grid.Row="0" Grid.Column="2" Margin="0" TextAlignment="Right">
                                     <TextBlock.Foreground>
-                                        <SolidColorBrush
-                                            Color="{Binding IsBeingClosed, Converter={StaticResource ProcessColorConverter}, Mode=OneTime}" />
+                                        <SolidColorBrush>
+                                            <SolidColorBrush.Color>
+                                                <MultiBinding Converter="{StaticResource ProcessColorConverter}">
+                                                    <Binding Path="IsBeingClosed" />
+                                                    <Binding RelativeSource="{RelativeSource AncestorType={x:Type ListBoxItem}}"
+                                                             Path="IsSelected" />
+                                                </MultiBinding>
+                                            </SolidColorBrush.Color>
+                                        </SolidColorBrush>
                                     </TextBlock.Foreground>
                                 </TextBlock>
                             </Grid>
@@ -199,13 +213,19 @@
                 <ListBox.ItemContainerStyle>
                     <Style TargetType="{x:Type ListBoxItem}" BasedOn="{StaticResource {x:Type ListBoxItem}}">
                         <Setter Property="Padding" Value="0,5" />
+                        <Style.Triggers>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter Property="Background" Value="#2F7CD6" />
+                                <Setter Property="Foreground" Value="White" />
+                            </Trigger>
+                        </Style.Triggers>
                         <EventSetter Event="MouseDoubleClick" Handler="ListBoxItem_MouseDoubleClick" />
                     </Style>
                 </ListBox.ItemContainerStyle>
                 <!-- Changes inactive selection color to be same as selected -->
                 <ListBox.Resources>
                     <SolidColorBrush x:Key="{x:Static SystemColors.ControlBrushKey}"
-                                     Color="{x:Static SystemColors.HighlightColor}" Opacity=".4" />
+                                     Color="#2F7CD6" />
                 </ListBox.Resources>
             </ListBox>
         </DockPanel>

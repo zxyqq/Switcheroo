@@ -479,6 +479,13 @@ namespace Switcheroo
             double width = Settings.Default.WindowWidth;
             Width = width > 0 ? width : 542;
 
+            double fontSize = Settings.Default.FontSize;
+            if (fontSize >= 8)
+            {
+                tb.FontSize = fontSize;
+                lb.FontSize = fontSize;
+            }
+
             double height = Settings.Default.WindowHeight;
             if (height > 0)
             {

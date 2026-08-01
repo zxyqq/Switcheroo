@@ -58,14 +58,17 @@
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
                 <TextBlock Text="Width:" VerticalAlignment="Center" />
                 <TextBox x:Name="WindowWidthTextBox" Grid.Column="1" Margin="5,2,0,2" Width="80" HorizontalAlignment="Left" />
                 <TextBlock Grid.Row="1" Text="Height:" VerticalAlignment="Center" />
                 <TextBox x:Name="WindowHeightTextBox" Grid.Row="1" Grid.Column="1" Margin="5,2,0,2" Width="80" HorizontalAlignment="Left" />
+                <TextBlock Grid.Row="2" Text="Font size:" VerticalAlignment="Center" />
+                <TextBox x:Name="FontSizeTextBox" Grid.Row="2" Grid.Column="1" Margin="5,2,0,2" Width="80" HorizontalAlignment="Left" />
             </Grid>
             <TextBlock Margin="25,0,5,10" FontSize="10" Foreground="DimGray" TextWrapping="Wrap">
-                Width of the popup that lists your windows.<LineBreak />
+                Width and font size of the popup that lists your windows.<LineBreak />
                 Height of 0 means the popup grows to fit its content.<LineBreak />
                 Changes take effect the next time the popup is shown.
             </TextBlock>
