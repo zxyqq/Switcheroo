@@ -32,10 +32,8 @@
         <local:WindowHandleToIconConverter x:Key="WindowHandleToIconConverter" />
         <local:WindowHandleToCachedIconConverter x:Key="WindowHandleToCachedIconConverter" />
 
-        <Color x:Key="SelectedBackgroundColor">#2F7CD6</Color>
-        <Color x:Key="SelectedForegroundColor">#FFFFFF</Color>
-        <SolidColorBrush x:Key="SelectedBackgroundBrush" Color="{DynamicResource SelectedBackgroundColor}" />
-        <SolidColorBrush x:Key="SelectedForegroundBrush" Color="{DynamicResource SelectedForegroundColor}" />
+        <SolidColorBrush x:Key="SelectedBackgroundBrush" Color="#2F7CD6" />
+        <SolidColorBrush x:Key="SelectedForegroundBrush" Color="#FFFFFF" />
 
         <local:SelectionAwareColorConverter x:Key="TitleColorConverter"
                                             SelectedColor="White" NormalColor="Black" ClosingColor="Silver" />
@@ -230,8 +228,7 @@
                 </ListBox.ItemContainerStyle>
                 <!-- Changes inactive selection color to be same as selected -->
                 <ListBox.Resources>
-                    <SolidColorBrush x:Key="{x:Static SystemColors.ControlBrushKey}"
-                                     Color="{DynamicResource SelectedBackgroundColor}" />
+                    <SolidColorBrush x:Key="{x:Static SystemColors.ControlBrushKey}" Color="#2F7CD6" />
                 </ListBox.Resources>
             </ListBox>
         </DockPanel>

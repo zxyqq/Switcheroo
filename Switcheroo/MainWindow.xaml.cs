@@ -523,8 +523,15 @@ namespace Switcheroo
             Log("ApplyColors: SelectedBackground='" + bgRaw + "' -> " + bg
                 + ", SelectedForeground='" + fgRaw + "' -> " + fg);
 
-            Resources["SelectedBackgroundColor"] = bg;
-            Resources["SelectedForegroundColor"] = fg;
+            var bgBrush = new SolidColorBrush(bg);
+            bgBrush.Freeze();
+            var fgBrush = new SolidColorBrush(fg);
+            fgBrush.Freeze();
+
+            Resources["SelectedBackgroundBrush"] = bgBrush;
+            Resources["SelectedForegroundBrush"] = fgBrush;
+            lb.Resources[SystemColors.ControlBrushKey] = bgBrush;
+            Log("ApplyColors: replaced SelectedBackgroundBrush/SelectedForegroundBrush/ControlBrushKey");
 
             var titleConv = Resources["TitleColorConverter"] as SelectionAwareColorConverter;
             var procConv = Resources["ProcessColorConverter"] as SelectionAwareColorConverter;
