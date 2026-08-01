@@ -226,9 +226,12 @@
                         </Style.Triggers>
                     </Style>
                 </ListBox.ItemContainerStyle>
-                <!-- Changes inactive selection color to be same as selected -->
+                <!-- Override system selection brushes for both active and inactive selection -->
                 <ListBox.Resources>
+                    <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="#2F7CD6" />
+                    <SolidColorBrush x:Key="{x:Static SystemColors.HighlightTextBrushKey}" Color="#FFFFFF" />
                     <SolidColorBrush x:Key="{x:Static SystemColors.ControlBrushKey}" Color="#2F7CD6" />
+                    <SolidColorBrush x:Key="{x:Static SystemColors.ControlTextBrushKey}" Color="#FFFFFF" />
                 </ListBox.Resources>
             </ListBox>
         </DockPanel>
