@@ -54,16 +54,14 @@ namespace ManagedWinapi
         // A global hotkey is implemented with a low-level keyboard hook instead of
         // RegisterHotKey. RegisterHotKey leaks the Alt key-up event to the foreground
         // window, so pressing Alt+<key> makes menu-bearing apps (Chrome, Explorer,
-        // Office) activate their menu bar. The low-level hook swallows the trigger
-        // key, and intercepts the Alt key-up: it blocks the real WM_SYSKEYUP(VK_MENU)
-        // (which is what enters menu mode) and delivers a non-system WM_KEYUP(VK_MENU)
-        // instead, so the key state is released without focusing the menu. Blocking the
-        // key-up outright would leave the app's keyboard state stuck ("Alt never
-        // released"), hence the substituted WM_KEYUP.
+        // Office) activate their menu bar. The hook swallows only the trigger key and
+        // lets all modifier key events (including Alt key-up) flow through unchanged,
+        // so key states stay consistent (no stuck Alt, no phantom Alt+Tab). To stop the
+        // stray Alt key-up from entering menu mode, a WM_CHAR is posted to the
+        // foreground window when the hotkey fires: a character between the Alt key-down
+        // and key-up makes DefWindowProc skip menu entry.
         private LowLevelKeyboardHook _hook;
-        private bool _mainKeyIsDown;   // edge detect so auto-repeat does not refire
-        private bool _interceptAltUp;  // block the next Alt key-up and repair state
-        private IntPtr _altDownHWnd;   // window that had focus when Alt went down
+        private bool _mainKeyIsDown; // edge detect so auto-repeat does not refire
 
         /// <summary>
         /// Initializes a new instance of this class with the specified container.
@@ -220,8 +218,6 @@ namespace ManagedWinapi
                 _hook.Dispose();
                 _hook = null;
                 _mainKeyIsDown = false;
-                _interceptAltUp = false;
-                _altDownHWnd = IntPtr.Zero;
                 lock (_staticLock)
                 {
                     _activeInstances.Remove(this);
@@ -251,7 +247,15 @@ namespace ManagedWinapi
                 if (down && !_mainKeyIsDown && ModifiersMatch())
                 {
                     _mainKeyIsDown = true;
-                    if (_alt) _interceptAltUp = true;
+                    if (_alt)
+                    {
+                        // Post a character to the foreground window so the upcoming Alt
+                        // key-up does not activate its menu bar: DefWindowProc enters
+                        // menu mode on Alt key-up only when no character was typed since
+                        // the Alt key-down. The real Alt key-up is let through below, so
+                        // the key state is released normally (no stuck Alt).
+                        PostMessage(GetForegroundWindow(), WM_CHAR, IntPtr.Zero, IntPtr.Zero);
+                    }
                     Trace.WriteLine("Hotkey fired: " + ComboSignature());
                     var handler = HotkeyPressed;
                     if (handler != null) handler(this, EventArgs.Empty);
@@ -265,43 +269,8 @@ namespace ManagedWinapi
                 return;
             }
 
-            // Remember which window received the Alt key-down (only that window's
-            // thread will track Alt as held). Captured once here, not on each trigger
-            // fire, so hold-Alt-and-tap-key cycling repairs the original window.
-            if (_alt && down && IsAltVk(vk))
-            {
-                _altDownHWnd = GetForegroundWindow();
-            }
-
-            // Intercept the Alt key-up after a hotkey has fired. The window that had
-            // focus when Alt went down would otherwise get a lone WM_SYSKEYUP(VK_MENU)
-            // and enter menu mode (Chrome's 3-dot menu). Block that real key-up and
-            // deliver a non-system WM_KEYUP(VK_MENU) to that window instead, so it
-            // releases the key state without triggering the menu. Other modifiers
-            // (Ctrl/Shift/Win) do not activate menus, so they are left alone.
-            if (_interceptAltUp && up && IsAltVk(vk))
-            {
-                _interceptAltUp = false;
-                // Block the real WM_SYSKEYUP and release the key state on the window
-                // that tracked Alt as down (via a non-system WM_KEYUP, which does not
-                // enter menu mode).
-                PostKeyUp(_altDownHWnd, vk, k.ScanCode, k.Flags);
-                handled = true;
-                return;
-            }
-        }
-
-        private static void PostKeyUp(IntPtr hwnd, int vk, int scanCode, int flags)
-        {
-            if (hwnd == IntPtr.Zero) return;
-            bool extended = (flags & 0x01) != 0; // LLKHF_EXTENDEDKEY
-            // repeat=1 | scan code | extended | previous state(1) | transition(1=up)
-            uint lparam = 1u
-                          | ((uint)(scanCode & 0xFF) << 16)
-                          | (extended ? (1u << 24) : 0u)
-                          | (1u << 30)
-                          | (1u << 31);
-            PostMessage(hwnd, WM_KEYUP, (IntPtr)vk, (IntPtr)lparam);
+            // All other keys (Alt and other modifiers included) flow through unchanged,
+            // keeping key states consistent with reality.
         }
 
         private bool ModifiersMatch()
@@ -310,11 +279,6 @@ namespace ManagedWinapi
                 && _ctrl == IsKeyDown(VK_CONTROL)
                 && _shift == IsKeyDown(VK_SHIFT)
                 && _windows == (IsKeyDown(VK_LWIN) || IsKeyDown(VK_RWIN));
-        }
-
-        private static bool IsAltVk(int vk)
-        {
-            return vk == VK_MENU || vk == VK_LMENU || vk == VK_RMENU;
         }
 
         private static bool IsKeyDown(int vk)
@@ -333,11 +297,11 @@ namespace ManagedWinapi
         [DllImport("user32.dll", SetLastError = true)]
         private static extern bool PostMessage(IntPtr hWnd, int Msg, IntPtr wParam, IntPtr lParam);
 
+        private const int WM_CHAR = 0x0102;
         private const int WM_KEYUP = 0x0101;
         private const int WM_KEYDOWN = 0x0100, WM_SYSKEYDOWN = 0x0104, WM_SYSKEYUP = 0x0105;
 
         private const int VK_SHIFT = 0x10, VK_CONTROL = 0x11, VK_MENU = 0x12;
-        private const int VK_LMENU = 0xA4, VK_RMENU = 0xA5;
         private const int VK_LWIN = 0x5B, VK_RWIN = 0x5C;
 
         #endregion
