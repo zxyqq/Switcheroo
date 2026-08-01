@@ -945,8 +945,6 @@ namespace Switcheroo
                 }
 
                 ScrollSelectedItemIntoView();
-                Preview();
-                //SwitchPreview();
             }
         }
 
