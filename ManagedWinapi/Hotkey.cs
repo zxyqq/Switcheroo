@@ -274,27 +274,19 @@ namespace ManagedWinapi
             }
 
             // Intercept the Alt key-up after a hotkey has fired. The window that had
-            // focus when Alt went down needs its key state released without a real
-            // WM_SYSKEYUP(VK_MENU) reaching a menu-bearing target window (which is
-            // what activates Chrome's 3-dot menu). Always repair the Alt-down window
-            // via a non-system WM_KEYUP, and block the real key-up only when focus is
-            // on another app's window. Other modifiers (Ctrl/Shift/Win) do not activate
-            // menus, so they are left alone.
+            // focus when Alt went down would otherwise get a lone WM_SYSKEYUP(VK_MENU)
+            // and enter menu mode (Chrome's 3-dot menu). Block that real key-up and
+            // deliver a non-system WM_KEYUP(VK_MENU) to that window instead, so it
+            // releases the key state without triggering the menu. Other modifiers
+            // (Ctrl/Shift/Win) do not activate menus, so they are left alone.
             if (_interceptAltUp && up && IsAltVk(vk))
             {
                 _interceptAltUp = false;
-                // Always repair the Alt-down window's key state (a non-system
-                // WM_KEYUP releases it without entering menu mode).
+                // Block the real WM_SYSKEYUP and release the key state on the window
+                // that tracked Alt as down (via a non-system WM_KEYUP, which does not
+                // enter menu mode).
                 PostKeyUp(_altDownHWnd, vk, k.ScanCode, k.Flags);
-                // Block the real key-up only when focus landed on another app's
-                // window (a real switch) - that stray Alt key-up is what would
-                // activate its menu. When focus is on our own window (the popup),
-                // let the real key-up through so releasing Alt confirms selection.
-                uint fgThread = GetWindowThreadProcessId(GetForegroundWindow(), IntPtr.Zero);
-                if (fgThread != GetCurrentThreadId())
-                {
-                    handled = true;
-                }
+                handled = true;
                 return;
             }
         }
@@ -340,12 +332,6 @@ namespace ManagedWinapi
 
         [DllImport("user32.dll", SetLastError = true)]
         private static extern bool PostMessage(IntPtr hWnd, int Msg, IntPtr wParam, IntPtr lParam);
-
-        [DllImport("user32.dll")]
-        private static extern uint GetWindowThreadProcessId(IntPtr hWnd, IntPtr lpdwProcessId);
-
-        [DllImport("kernel32.dll")]
-        private static extern uint GetCurrentThreadId();
 
         private const int WM_KEYUP = 0x0101;
         private const int WM_KEYDOWN = 0x0100, WM_SYSKEYDOWN = 0x0104, WM_SYSKEYUP = 0x0105;
