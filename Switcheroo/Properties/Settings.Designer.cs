@@ -286,5 +286,29 @@ namespace Switcheroo.Properties {
                 this["FontSize"] = value;
             }
         }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("#2F7CD6")]
+        public string SelectedBackground {
+            get {
+                return ((string)(this["SelectedBackground"]));
+            }
+            set {
+                this["SelectedBackground"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("#FFFFFF")]
+        public string SelectedForeground {
+            get {
+                return ((string)(this["SelectedForeground"]));
+            }
+            set {
+                this["SelectedForeground"] = value;
+            }
+        }
     }
 }

@@ -31,6 +31,7 @@ using System.Windows.Controls;
 using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Interop;
+using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Threading;
 using ManagedWinapi;
@@ -78,6 +79,8 @@ namespace Switcheroo
         {
             InitializeComponent();
             Log("Constructor: InitializeComponent done.");
+
+            ApplyColors();
 
             SetUpKeyBindings();
             SetUpNotifyIcon();
@@ -506,6 +509,38 @@ namespace Switcheroo
             // Position the window in the center of the screen
             Left = (SystemParameters.PrimaryScreenWidth/2) - (ActualWidth/2);
             Top = (SystemParameters.PrimaryScreenHeight/2) - (ActualHeight/2);
+        }
+
+        private void ApplyColors()
+        {
+            var bg = ParseColor(Settings.Default.SelectedBackground, Color.FromRgb(0x2F, 0x7C, 0xD6));
+            var fg = ParseColor(Settings.Default.SelectedForeground, Colors.White);
+
+            Resources["SelectedBackgroundColor"] = bg;
+            Resources["SelectedForegroundColor"] = fg;
+
+            ((SelectionAwareColorConverter) Resources["TitleColorConverter"]).SelectedColor = fg;
+            ((SelectionAwareColorConverter) Resources["ProcessColorConverter"]).SelectedColor = fg;
+        }
+
+        private static Color ParseColor(string hex, Color fallback)
+        {
+            if (string.IsNullOrWhiteSpace(hex))
+            {
+                return fallback;
+            }
+            try
+            {
+                if (ColorConverter.ConvertFromString(hex.Trim()) is Color color)
+                {
+                    return color;
+                }
+            }
+            catch
+            {
+                // Ignore invalid hex and fall back
+            }
+            return fallback;
         }
 
         /// <summary>

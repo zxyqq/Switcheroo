@@ -68,5 +68,11 @@
     <Setting Name="FontSize" Type="System.Double" Scope="User">
       <Value Profile="(Default)">15</Value>
     </Setting>
+    <Setting Name="SelectedBackground" Type="System.String" Scope="User">
+      <Value Profile="(Default)">#2F7CD6</Value>
+    </Setting>
+    <Setting Name="SelectedForeground" Type="System.String" Scope="User">
+      <Value Profile="(Default)">#FFFFFF</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

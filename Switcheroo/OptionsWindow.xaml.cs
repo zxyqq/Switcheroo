@@ -94,6 +94,8 @@ namespace Switcheroo
             WindowWidthTextBox.Text = Settings.Default.WindowWidth.ToString(CultureInfo.CurrentCulture);
             WindowHeightTextBox.Text = Settings.Default.WindowHeight.ToString(CultureInfo.CurrentCulture);
             FontSizeTextBox.Text = Settings.Default.FontSize.ToString(CultureInfo.CurrentCulture);
+            SelectedBackgroundTextBox.Text = Settings.Default.SelectedBackground;
+            SelectedForegroundTextBox.Text = Settings.Default.SelectedForeground;
         }
 
         private void Cancel_Click(object sender, RoutedEventArgs e)
@@ -178,6 +180,15 @@ namespace Switcheroo
                 && fontSize >= 8 && fontSize <= 48)
             {
                 Settings.Default.FontSize = fontSize;
+            }
+
+            if (!string.IsNullOrWhiteSpace(SelectedBackgroundTextBox.Text))
+            {
+                Settings.Default.SelectedBackground = SelectedBackgroundTextBox.Text.Trim();
+            }
+            if (!string.IsNullOrWhiteSpace(SelectedForegroundTextBox.Text))
+            {
+                Settings.Default.SelectedForeground = SelectedForegroundTextBox.Text.Trim();
             }
 
             Settings.Default.Save();

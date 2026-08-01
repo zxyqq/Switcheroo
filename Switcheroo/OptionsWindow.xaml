@@ -72,6 +72,25 @@
                 Height of 0 means the popup grows to fit its content.<LineBreak />
                 Changes take effect the next time the popup is shown.
             </TextBlock>
+            <TextBlock Margin="5,8,5,1" FontWeight="Bold">Selected item colors</TextBlock>
+            <Grid Margin="5,3,5,1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <TextBlock Text="Background (hex):" VerticalAlignment="Center" />
+                <TextBox x:Name="SelectedBackgroundTextBox" Grid.Column="1" Margin="5,2,0,2" Width="100" HorizontalAlignment="Left" />
+                <TextBlock Grid.Row="1" Text="Font (hex):" VerticalAlignment="Center" />
+                <TextBox x:Name="SelectedForegroundTextBox" Grid.Row="1" Grid.Column="1" Margin="5,2,0,2" Width="100" HorizontalAlignment="Left" />
+            </Grid>
+            <TextBlock Margin="25,0,5,10" FontSize="10" Foreground="DimGray" TextWrapping="Wrap">
+                Hex colors for the highlighted list row, e.g. <Span FontFamily="Consolas" FontWeight="Bold">#2F7CD6</Span>.<LineBreak />
+                Changes take effect the next time the popup is shown.
+            </TextBlock>
             <Grid Margin="5">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition />
