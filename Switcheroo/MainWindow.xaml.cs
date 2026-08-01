@@ -741,7 +741,10 @@ namespace Switcheroo
             }
             else
             {
-                HideWindow();
+                // Hotkey pressed again while the list is visible: cycle the selection
+                // down (Alt+Tab-style) instead of hiding. Release Alt or press Enter to
+                // confirm; Esc still dismisses.
+                NextItem();
             }
         }
 
