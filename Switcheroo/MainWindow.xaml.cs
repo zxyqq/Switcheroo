@@ -476,9 +476,25 @@ namespace Switcheroo
             // Reset height every time to ensure that resolution changes take effect
             Border.MaxHeight = SystemParameters.PrimaryScreenHeight;
 
+            double width = Settings.Default.WindowWidth;
+            Width = width > 0 ? width : 542;
+
+            double height = Settings.Default.WindowHeight;
+            if (height > 0)
+            {
+                // Fixed height: the window list scrolls inside the popup
+                SizeToContent = SizeToContent.Manual;
+                Height = height;
+            }
+            else
+            {
+                // Auto height: the popup grows to fit its content
+                SizeToContent = SizeToContent.Height;
+                Height = double.NaN;
+            }
+
             // Force a rendering before repositioning the window
-            SizeToContent = SizeToContent.Manual;
-            SizeToContent = SizeToContent.WidthAndHeight;
+            UpdateLayout();
 
             // Position the window in the center of the screen
             Left = (SystemParameters.PrimaryScreenWidth/2) - (ActualWidth/2);

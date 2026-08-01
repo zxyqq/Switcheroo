@@ -18,6 +18,7 @@
  * along with Switcheroo.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+using System.Globalization;
 using System.Text;
 using System.Windows;
 using System.Windows.Forms;
@@ -90,6 +91,8 @@ namespace Switcheroo
             AutoSwitch.IsEnabled = Settings.Default.AltTabHook;
             RunAsAdministrator.IsChecked = Settings.Default.RunAsAdmin;
             EnableLogCheckBox.IsChecked = Settings.Default.EnableLog;
+            WindowWidthTextBox.Text = Settings.Default.WindowWidth.ToString(CultureInfo.CurrentCulture);
+            WindowHeightTextBox.Text = Settings.Default.WindowHeight.ToString(CultureInfo.CurrentCulture);
         }
 
         private void Cancel_Click(object sender, RoutedEventArgs e)
@@ -156,6 +159,20 @@ namespace Switcheroo
             Settings.Default.AutoSwitch = AutoSwitch.IsChecked.GetValueOrDefault();
             Settings.Default.RunAsAdmin = RunAsAdministrator.IsChecked.GetValueOrDefault();
             Settings.Default.EnableLog = EnableLogCheckBox.IsChecked.GetValueOrDefault();
+
+            double width;
+            if (double.TryParse(WindowWidthTextBox.Text, NumberStyles.Float, CultureInfo.CurrentCulture, out width)
+                && width >= 300 && width <= 4000)
+            {
+                Settings.Default.WindowWidth = width;
+            }
+            double height;
+            if (double.TryParse(WindowHeightTextBox.Text, NumberStyles.Float, CultureInfo.CurrentCulture, out height)
+                && height >= 0 && height <= 4000)
+            {
+                Settings.Default.WindowHeight = height;
+            }
+
             Settings.Default.Save();
 
             Program.ConfigureLogging();

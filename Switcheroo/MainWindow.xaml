@@ -4,8 +4,7 @@
         xmlns:local="clr-namespace:Switcheroo"
         xmlns:system="clr-namespace:System;assembly=mscorlib"
         Closing="OnClose" ResizeMode="NoResize" ShowInTaskbar="False" WindowStyle="None" AllowsTransparency="True"
-        SizeToContent="WidthAndHeight"
-        Title="" MinWidth="542" Deactivated="MainWindow_OnLostFocus" Loaded="MainWindow_OnLoaded"
+        Title="" Width="542" MinWidth="300" Deactivated="MainWindow_OnLostFocus" Loaded="MainWindow_OnLoaded"
         BorderBrush="Transparent" BorderThickness="1"
         Background="Transparent">
 
@@ -108,7 +107,7 @@
                     </TextBlock.Triggers>
                 </TextBlock>
             </Grid>
-            <ListBox Name="lb" SelectionMode="Extended" ItemsSource="{Binding}" MinWidth="522" BorderThickness="0"
+            <ListBox Name="lb" SelectionMode="Extended" ItemsSource="{Binding}" MinWidth="300" BorderThickness="0"
                      Margin="-1,3,-1,0" Padding="0" DockPanel.Dock="Bottom">
                 <ListBox.ItemTemplate>
                     <DataTemplate>
@@ -163,7 +162,7 @@
                                 </Grid.RowDefinitions>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="22" />
-                                    <ColumnDefinition Width="400" />
+                                    <ColumnDefinition Width="*" />
                                     <ColumnDefinition Width="106" />
                                 </Grid.ColumnDefinitions>
                                 <Image Height="19" Grid.Row="0" Grid.Column="0" Margin="3,0"

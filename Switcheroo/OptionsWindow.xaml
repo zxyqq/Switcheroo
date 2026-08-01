@@ -49,6 +49,26 @@
                 Write a diagnostic log file (<Span FontFamily="Consolas">%LOCALAPPDATA%\Switcheroo\switcheroo.log</Span>).<LineBreak />
                 Enable this when reporting issues.
             </TextBlock>
+            <TextBlock Margin="5,8,5,1" FontWeight="Bold">Switcheroo window size</TextBlock>
+            <Grid Margin="5,3,5,1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <TextBlock Text="Width:" VerticalAlignment="Center" />
+                <TextBox x:Name="WindowWidthTextBox" Grid.Column="1" Margin="5,2,0,2" Width="80" HorizontalAlignment="Left" />
+                <TextBlock Grid.Row="1" Text="Height:" VerticalAlignment="Center" />
+                <TextBox x:Name="WindowHeightTextBox" Grid.Row="1" Grid.Column="1" Margin="5,2,0,2" Width="80" HorizontalAlignment="Left" />
+            </Grid>
+            <TextBlock Margin="25,0,5,10" FontSize="10" Foreground="DimGray" TextWrapping="Wrap">
+                Width of the popup that lists your windows.<LineBreak />
+                Height of 0 means the popup grows to fit its content.<LineBreak />
+                Changes take effect the next time the popup is shown.
+            </TextBlock>
             <Grid Margin="5">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition />
