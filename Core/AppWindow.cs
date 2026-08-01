@@ -26,6 +26,8 @@ using System.Linq;
 using System.Runtime.Caching;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Windows.Forms;
+using ManagedWinapi;
 using ManagedWinapi.Windows;
 
 namespace Switcheroo.Core
@@ -98,6 +100,22 @@ namespace Switcheroo.Core
         {
             var lastActiveVisiblePopup = GetLastActiveVisiblePopup();
             WinApi.SwitchToThisWindow(lastActiveVisiblePopup, true);
+            MaskAltMenuActivation();
+        }
+
+        /// <summary>
+        /// Prevents the target window's menu bar from activating after an
+        /// Alt-modifier hotkey switch. RegisterHotKey swallows the trigger key, so the
+        /// target sees only "Alt pressed and released" and would enter menu mode
+        /// (Chrome's 3-dot menu). Sending a Control keystroke gives DefWindowProc an
+        /// intervening key event, so it skips menu entry on the Alt key-up - the same
+        /// trick AutoHotkey uses (#MenuMaskKey). Only applied when Alt is held, so
+        /// non-Alt switches and a user-held Ctrl are unaffected.
+        /// </summary>
+        private static void MaskAltMenuActivation()
+        {
+            if ((new KeyboardKey(Keys.Menu).AsyncState & 0x8000) == 0) return;
+            new KeyboardKey(Keys.LControlKey).PressAndRelease();
         }
 
         public AppWindow Owner
