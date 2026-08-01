@@ -44,6 +44,11 @@
                 <LineBreak />
                 <Italic>* Requires a restart of Switcheroo</Italic>
             </TextBlock>
+            <CheckBox x:Name="EnableLogCheckBox" Margin="5,5,5,1" Content="Enable Log File"/>
+            <TextBlock Margin="25,0,5,10" FontSize="10" Foreground="DimGray" TextWrapping="Wrap">
+                Write a diagnostic log file (<Span FontFamily="Consolas">%LOCALAPPDATA%\Switcheroo\switcheroo.log</Span>).<LineBreak />
+                Enable this when reporting issues.
+            </TextBlock>
             <Grid Margin="5">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition />

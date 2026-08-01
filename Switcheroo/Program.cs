@@ -114,15 +114,25 @@ namespace Switcheroo
             }
         }
 
-        private static void ConfigureLogging()
+        public static void ConfigureLogging()
         {
             try
             {
+                foreach (TraceListener listener in Trace.Listeners)
+                {
+                    listener.Dispose();
+                }
+                Trace.Listeners.Clear();
+
+                if (!Settings.Default.EnableLog)
+                {
+                    return;
+                }
+
                 var logDirectory = Path.Combine(
                     Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Switcheroo");
                 Directory.CreateDirectory(logDirectory);
                 var logPath = Path.Combine(logDirectory, "switcheroo.log");
-                Trace.Listeners.Clear();
                 var fileStream = new FileStream(logPath, FileMode.Append, FileAccess.Write, FileShare.ReadWrite);
                 Trace.Listeners.Add(new TextWriterTraceListener(fileStream)
                 {
