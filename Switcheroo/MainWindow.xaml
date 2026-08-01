@@ -217,6 +217,23 @@
                 <ListBox.ItemContainerStyle>
                     <Style TargetType="{x:Type ListBoxItem}" BasedOn="{StaticResource {x:Type ListBoxItem}}">
                         <Setter Property="Padding" Value="0,5" />
+                        <!-- Custom template: the selection highlight is the item's own Background,
+                             which the IsSelected trigger below binds directly to the configurable
+                             SelectedBackgroundBrush. This removes any dependence on which
+                             SystemColors key the current theme happens to use for active/inactive
+                             selection (the popup keeps keyboard focus in the TextBox, so the ListBox
+                             always renders selection as "inactive"). -->
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="{x:Type ListBoxItem}">
+                                    <Border Background="{TemplateBinding Background}"
+                                            Padding="{TemplateBinding Padding}"
+                                            SnapsToDevicePixels="True">
+                                        <ContentPresenter />
+                                    </Border>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
                         <EventSetter Event="MouseDoubleClick" Handler="ListBoxItem_MouseDoubleClick" />
                         <Style.Triggers>
                             <Trigger Property="IsSelected" Value="True">
@@ -226,19 +243,6 @@
                         </Style.Triggers>
                     </Style>
                 </ListBox.ItemContainerStyle>
-                <!-- Override system selection brushes for both active and inactive selection.
-                     The popup keeps keyboard focus in the search TextBox, so the ListBox
-                     renders its selected item via the INACTIVE selection keys
-                     (InactiveSelectionHighlightBrushKey) on the Aero2 theme (Win10/11),
-                     not ControlBrushKey. All four keys must be covered. -->
-                <ListBox.Resources>
-                    <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="#2F7CD6" />
-                    <SolidColorBrush x:Key="{x:Static SystemColors.HighlightTextBrushKey}" Color="#FFFFFF" />
-                    <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}" Color="#2F7CD6" />
-                    <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightTextBrushKey}" Color="#FFFFFF" />
-                    <SolidColorBrush x:Key="{x:Static SystemColors.ControlBrushKey}" Color="#2F7CD6" />
-                    <SolidColorBrush x:Key="{x:Static SystemColors.ControlTextBrushKey}" Color="#FFFFFF" />
-                </ListBox.Resources>
             </ListBox>
         </DockPanel>
     </Border>
