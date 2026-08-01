@@ -18,6 +18,7 @@
  * along with Switcheroo.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+using System.Diagnostics;
 using System.Globalization;
 using System.Text;
 using System.Windows;
@@ -190,6 +191,8 @@ namespace Switcheroo
             {
                 Settings.Default.SelectedForeground = SelectedForegroundTextBox.Text.Trim();
             }
+            Trace.WriteLine("[Options] Saving colors: SelectedBackground='" + Settings.Default.SelectedBackground
+                + "', SelectedForeground='" + Settings.Default.SelectedForeground + "'");
 
             Settings.Default.Save();
 

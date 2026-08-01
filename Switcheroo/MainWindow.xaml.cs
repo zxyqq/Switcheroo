@@ -364,6 +364,7 @@ namespace Switcheroo
         /// </summary>
         private void LoadData(InitialFocus focus)
         {
+            ApplyColors();
             _unfilteredWindowList = new WindowFinder().GetWindows().Select(window => new AppWindowViewModel(window)).ToList();
 
             var firstWindow = _unfilteredWindowList.FirstOrDefault();
@@ -403,6 +404,7 @@ namespace Switcheroo
         private ObservableCollection<AppWindowViewModel> LoadCurData(InitialFocus focus, string AWinPrcsName)
         {
 
+            ApplyColors();
             _unfilteredWindowList = new WindowFinder().GetWindows().Select(window => new AppWindowViewModel(window)).ToList();
 
 
@@ -513,20 +515,30 @@ namespace Switcheroo
 
         private void ApplyColors()
         {
-            var bg = ParseColor(Settings.Default.SelectedBackground, Color.FromRgb(0x2F, 0x7C, 0xD6));
-            var fg = ParseColor(Settings.Default.SelectedForeground, Colors.White);
+            var bgRaw = Settings.Default.SelectedBackground;
+            var fgRaw = Settings.Default.SelectedForeground;
+            var bg = ParseColor(bgRaw, Color.FromRgb(0x2F, 0x7C, 0xD6));
+            var fg = ParseColor(fgRaw, Colors.White);
+
+            Log("ApplyColors: SelectedBackground='" + bgRaw + "' -> " + bg
+                + ", SelectedForeground='" + fgRaw + "' -> " + fg);
 
             Resources["SelectedBackgroundColor"] = bg;
             Resources["SelectedForegroundColor"] = fg;
 
-            ((SelectionAwareColorConverter) Resources["TitleColorConverter"]).SelectedColor = fg;
-            ((SelectionAwareColorConverter) Resources["ProcessColorConverter"]).SelectedColor = fg;
+            var titleConv = Resources["TitleColorConverter"] as SelectionAwareColorConverter;
+            var procConv = Resources["ProcessColorConverter"] as SelectionAwareColorConverter;
+            Log("ApplyColors: TitleColorConverter=" + (titleConv == null ? "NULL" : "ok")
+                + ", ProcessColorConverter=" + (procConv == null ? "NULL" : "ok"));
+            if (titleConv != null) titleConv.SelectedColor = fg;
+            if (procConv != null) procConv.SelectedColor = fg;
         }
 
         private static Color ParseColor(string hex, Color fallback)
         {
             if (string.IsNullOrWhiteSpace(hex))
             {
+                Log("ParseColor: empty/null hex, using fallback " + fallback);
                 return fallback;
             }
             try
@@ -535,10 +547,11 @@ namespace Switcheroo
                 {
                     return color;
                 }
+                Log("ParseColor: '" + hex + "' did not parse to a Color, using fallback " + fallback);
             }
-            catch
+            catch (Exception ex)
             {
-                // Ignore invalid hex and fall back
+                Log("ParseColor: invalid hex '" + hex + "' (" + ex.Message + "), using fallback " + fallback);
             }
             return fallback;
         }
