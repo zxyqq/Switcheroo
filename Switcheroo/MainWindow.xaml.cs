@@ -532,9 +532,11 @@ namespace Switcheroo
             Resources["SelectedForegroundBrush"] = fgBrush;
             lb.Resources[SystemColors.HighlightBrushKey] = bgBrush;
             lb.Resources[SystemColors.HighlightTextBrushKey] = fgBrush;
+            lb.Resources[SystemColors.InactiveSelectionHighlightBrushKey] = bgBrush;
+            lb.Resources[SystemColors.InactiveSelectionHighlightTextBrushKey] = fgBrush;
             lb.Resources[SystemColors.ControlBrushKey] = bgBrush;
             lb.Resources[SystemColors.ControlTextBrushKey] = fgBrush;
-            Log("ApplyColors: replaced SelectedBackgroundBrush/SelectedForegroundBrush + Highlight/Control system keys");
+            Log("ApplyColors: replaced SelectedBackgroundBrush/SelectedForegroundBrush + Highlight/InactiveSelection/Control system keys");
 
             var titleConv = Resources["TitleColorConverter"] as SelectionAwareColorConverter;
             var procConv = Resources["ProcessColorConverter"] as SelectionAwareColorConverter;

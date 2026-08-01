@@ -226,10 +226,16 @@
                         </Style.Triggers>
                     </Style>
                 </ListBox.ItemContainerStyle>
-                <!-- Override system selection brushes for both active and inactive selection -->
+                <!-- Override system selection brushes for both active and inactive selection.
+                     The popup keeps keyboard focus in the search TextBox, so the ListBox
+                     renders its selected item via the INACTIVE selection keys
+                     (InactiveSelectionHighlightBrushKey) on the Aero2 theme (Win10/11),
+                     not ControlBrushKey. All four keys must be covered. -->
                 <ListBox.Resources>
                     <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="#2F7CD6" />
                     <SolidColorBrush x:Key="{x:Static SystemColors.HighlightTextBrushKey}" Color="#FFFFFF" />
+                    <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}" Color="#2F7CD6" />
+                    <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightTextBrushKey}" Color="#FFFFFF" />
                     <SolidColorBrush x:Key="{x:Static SystemColors.ControlBrushKey}" Color="#2F7CD6" />
                     <SolidColorBrush x:Key="{x:Static SystemColors.ControlTextBrushKey}" Color="#FFFFFF" />
                 </ListBox.Resources>
